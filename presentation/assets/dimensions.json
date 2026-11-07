@@ -1,0 +1,90 @@
+{
+  "board-detail.png": [
+    1116,
+    314
+  ],
+  "board-prod.png": [
+    2200,
+    2000
+  ],
+  "clock.jpg": [
+    1800,
+    1200
+  ],
+  "demo-cover.png": [
+    1280,
+    800
+  ],
+  "duel-clock.png": [
+    288,
+    126
+  ],
+  "duel-detail.png": [
+    1672,
+    316
+  ],
+  "duel-prod.png": [
+    2200,
+    2000
+  ],
+  "lab.jpg": [
+    1800,
+    1200
+  ],
+  "replay-prod.png": [
+    2200,
+    4410
+  ],
+  "russian-icpc.jpg": [
+    620,
+    465
+  ],
+  "stopwatch.jpg": [
+    1800,
+    1350
+  ],
+  "team-detail.png": [
+    1432,
+    520
+  ],
+  "team-prod.png": [
+    2200,
+    2000
+  ],
+  "timeline-detail.png": [
+    1292,
+    280
+  ],
+  "var-referee.jpg": [
+    1200,
+    630
+  ],
+  "verdict-detail.png": [
+    340,
+    640
+  ],
+  "verdict-ok.png": [
+    374,
+    146
+  ],
+  "verdict-tle.png": [
+    374,
+    146
+  ],
+  "role-organizer.png": [
+    1410,
+    681
+  ],
+  "role-participant.png": [
+    1280,
+    585
+  ],
+  "board-overview.png": [
+    1396,
+    666
+  ],
+  "replay-journal.png": [
+    343,
+    596
+  ]
+}

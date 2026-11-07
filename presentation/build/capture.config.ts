@@ -1,0 +1,1 @@
+import {defineConfig} from "@playwright/test"; export default defineConfig({globalTeardown:"../../tests/fixtures/cleanup.ts",testDir:"../../tests/e2e",testMatch:"demo.capture.ts",timeout:120000,workers:1,reporter:"list",use:{baseURL:process.env.TEST_BASE_URL||"http://localhost:8080",channel:"chrome",viewport:{width:1440,height:900}}});

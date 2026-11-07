@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+model User {
+  id String @id @default(cuid())
+  email String @unique
+  name String
+  password String
+  role String @default("PARTICIPANT")
+  rating Int @default(1200)
+}
+model Problem {
+  id String @id @default(cuid())
+  title String
+  statement String
+  timeMs Int @default(1000)
+  memoryMb Int @default(256)
+  tests Json
+  checker String @default("tokens")
+  duelPool Boolean @default(true)
+  authorId String
+  createdAt DateTime @default(now())
+}
+model Contest {
+  id String @id @default(cuid())
+  title String
+  description String @default("")
+  authorId String
+  format String @default("INDIVIDUAL")
+  scoring String @default("ICPC")
+  problemIds String[]
+  startAt DateTime
+  duration Int @default(60)
+  published Boolean @default(false)
+  integrityEnabled Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+model Entry {
+  id String @id @default(cuid())
+  contestId String
+  userId String
+  teamId String @default("")
+  disqualified Boolean @default(false)
+  createdAt DateTime @default(now())
+  @@unique([contestId,userId])
+}
+model Match {
+  id String @id @default(cuid())
+  token String @unique @default(cuid())
+  hostId String
+  guestId String?
+  problemIds String[]
+  duration Int @default(20)
+  readyIds String[]
+  startAt DateTime?
+  endsAt DateTime?
+  surrenderedId String?
+  createdAt DateTime @default(now())
+}
+model Team {
+  id String @id @default(cuid())
+  token String @unique @default(cuid())
+  name String
+  captainId String
+  memberIds String[]
+  createdAt DateTime @default(now())
+}
+model Submission {
+  id String @id @default(cuid())
+  userId String
+  contextId String
+  teamId String @default("")
+  problemId String
+  language String
+  code String
+  status String @default("QUEUED")
+  result Json?
+  score Float @default(0)
+  sample Boolean @default(false)
+  createdAt DateTime @default(now())
+  @@index([contextId])
+  @@index([userId,createdAt])
+}
+model EditorSession {
+  id String @id @default(cuid())
+  userId String
+  contextId String
+  problemId String
+  code String @default("")
+  language String @default("python")
+  seq Int @default(0)
+  hash String @default("")
+  updatedAt DateTime @updatedAt
+  @@unique([userId,contextId,problemId])
+}
+model EditorEvent {
+  id String @id @default(cuid())
+  sessionId String
+  seq Int
+  type String
+  payload Json
+  previousHash String
+  hash String
+  createdAt DateTime @default(now())
+  @@unique([sessionId,seq])
+}
+model IntegrityFlag {
+  id String @id @default(cuid())
+  userId String
+  contextId String
+  problemId String
+  type String
+  level String
+  explanation String
+  eventId String?
+  createdAt DateTime @default(now())
+}
+model Review {
+  id String @id @default(cuid())
+  userId String
+  contextId String
+  organizerId String
+  decision String
+  comment String
+  createdAt DateTime @default(now())
+}
+model Consent {
+  id String @id @default(cuid())
+  userId String
+  contextId String
+  createdAt DateTime @default(now())
+  @@unique([userId,contextId])
+}
+model Claim {
+  id String @id @default(cuid())
+  teamId String
+  contextId String
+  problemId String
+  userId String
+  @@unique([teamId,contextId,problemId])
+}
+model Chat {
+  id String @id @default(cuid())
+  teamId String
+  userId String
+  text String
+  createdAt DateTime @default(now())
+}

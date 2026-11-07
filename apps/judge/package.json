@@ -1,0 +1,13 @@
+{
+  "name": "@fairround/judge",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch main.ts",
+    "start": "tsx main.ts"
+  },
+  "dependencies": {
+    "bullmq": "^5.71.0",
+    "ioredis": "^5.10.1",
+    "dockerode": "^4.0.10"
+  }
+}

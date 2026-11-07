@@ -1,0 +1,21 @@
+{$SITE_ADDRESS::80} {
+  handle /api/* {
+    reverse_proxy api:3001
+  }
+  handle /socket.io/* {
+    reverse_proxy api:3001
+  }
+  handle_path /materials/* {
+    root * /srv/materials
+    file_server
+  }
+  handle {
+    reverse_proxy web:3000
+  }
+  header {
+    X-Content-Type-Options nosniff
+    Referrer-Policy same-origin
+    Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    X-Frame-Options DENY
+  }
+}

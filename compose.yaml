@@ -1,0 +1,90 @@
+name: fairround
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: fairround
+      POSTGRES_USER: fairround
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U fairround"]
+      interval: 5s
+      retries: 20
+    restart: unless-stopped
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy noeviction
+    volumes: ["redisdata:/data"]
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      retries: 20
+    restart: unless-stopped
+  api:
+    image: fairround-api:latest
+    build: { context: ., dockerfile: deploy/Dockerfile, target: api }
+    environment: &environment
+      DATABASE_URL: postgresql://fairround:${POSTGRES_PASSWORD}@postgres:5432/fairround
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
+      DEMO_MODE: ${DEMO_MODE:-true}
+      DISPLAY_TZ: ${DISPLAY_TZ:-Europe/Samara}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:8080}
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3001/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 20s
+    restart: unless-stopped
+  judge:
+    image: fairround-judge:latest
+    build: { context: ., dockerfile: deploy/Dockerfile, target: judge }
+    environment:
+      <<: *environment
+      JUDGE_CONCURRENCY: ${JUDGE_CONCURRENCY:-2}
+    volumes: ["/var/run/docker.sock:/var/run/docker.sock"]
+    depends_on:
+      api: {condition: service_healthy}
+    restart: unless-stopped
+  web:
+    image: fairround-web:latest
+    build: { context: ., dockerfile: deploy/Dockerfile, target: web }
+    environment:
+      API_INTERNAL_URL: http://api:3001
+      DISPLAY_TZ: ${DISPLAY_TZ:-Europe/Samara}
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    restart: unless-stopped
+  proxy:
+    image: caddy:2-alpine
+    ports: ["${HTTP_PORT:-8080}:80", "${HTTPS_PORT:-8443}:443"]
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+    volumes:
+      [
+        "./deploy/Caddyfile:/etc/caddy/Caddyfile:ro",
+        "${MATERIALS_DIR:-./presentation}:/srv/materials:ro",
+        "caddydata:/data",
+        "caddyconfig:/config",
+      ]
+    depends_on:
+      api: {condition: service_healthy}
+      web: {condition: service_healthy}
+    restart: unless-stopped
+volumes:
+  pgdata:
+  redisdata:
+  caddydata:
+  caddyconfig:
